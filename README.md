@@ -1,2 +1,2 @@
 # datasciencecoursera
-Repository for the Data Science Specialiastions on Coursera
+Repository for the Data Science Specialization on Coursera
