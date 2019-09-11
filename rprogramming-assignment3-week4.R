@@ -69,3 +69,32 @@ rankhospital("NC", "heart attack", "worst")
 rankhospital("WA", "heart attack", 7)
 rankhospital("TX", "pneumonia", 10)
 rankhospital("NY", "heart attack", 7)
+
+rankall <- function(outcome, num = "best") {
+  require(tidyverse)
+  
+  # check valid outcome
+  if (!num %in% c("best", "worst") & !is.numeric(num)) stop("invalid num")
+  if (!outcome %in% c("heart attack", "heart failure", "pneumonia")) stop("invalid outcome")
+  
+  outcome_data <- suppressMessages(read_csv("outcome-of-care-measures.csv", na = c("", "Not Available"))) %>% 
+    rename(`heart attack` = `Hospital 30-Day Death (Mortality) Rates from Heart Attack`,
+           `heart failure` = `Hospital 30-Day Death (Mortality) Rates from Heart Failure`,
+           pneumonia = `Hospital 30-Day Death (Mortality) Rates from Pneumonia`)
+  
+  rank <- case_when(
+    num == "best" ~ 1L,
+    num == "worst" ~ -1L,
+    TRUE ~ suppressWarnings(as.integer(num))
+  )
+  
+  outcome_data %>% 
+    group_by(State) %>% 
+    filter(!is.na(!!ensym(outcome))) %>% 
+    arrange(!!ensym(outcome), `Hospital Name`) %>% 
+    summarise(hospital = nth(`Hospital Name`, rank)) %>% 
+    select(`Hospital Name`, State)
+
+}
+
+rankall("heart attack", 20)
